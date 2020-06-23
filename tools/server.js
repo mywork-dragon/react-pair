@@ -45,7 +45,7 @@ io.on('connection', (socket) => {
     console.log('in joining room in SERVER')
     socket.join(data.room);
     console.log(data.users)
-    socket.broadcast.to(data.room).emit('load present users')
+    socket.broadcast.to(data.room).emit('load users and code')
     socket.broadcast.to(data.room).emit('new user join', data.user)
   });
 
@@ -56,15 +56,15 @@ io.on('connection', (socket) => {
 
   socket.on('coding event', function(data) {
     console.log('in EXPRESS coding event')
-    console.log(data.room)
-    socket.broadcast.to(data.room).emit('receive code', data.code);
+    console.log(data)
+    socket.broadcast.to(data.room).emit('receive code', {code: data.code, currentlyTyping: data.currentlyTyping});
   })
   socket.on('change mode', function(data) {
     socket.broadcast.to(data.room).emit('receive change mode', data.mode)
   })
 
-  socket.on('send users', function(data) {
-    socket.broadcast.to(data.room).emit('load users', data.users)
+  socket.on('send users and code', function(data) {
+    socket.broadcast.to(data.room).emit('receive users and code', data)
   })
 });
 
