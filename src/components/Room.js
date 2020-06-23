@@ -1,4 +1,5 @@
 import React from 'react'
+const io = require('socket.io-client')
 const socket = io()
 import Codemirror from 'react-codemirror';
 import ModeSelect from './ModeSelect';
@@ -53,6 +54,7 @@ class Room extends React.Component {
       this.props.actions.getChallenges();
     } else {
       const user = this.props.currentUser
+      sessionStorage.setItem('currentUser', user)
       const users = [...this.state.users, this.props.currentUser]
       socket.emit('room', {room: this.props.challenge.id, user: user});
       this.setState({users: users})
@@ -66,7 +68,7 @@ class Room extends React.Component {
   componentWillReceiveProps(nextProps) {
     const user = nextProps.currentUser
     const users = [...this.state.users, user]
-    socket.emit('room', {room: this.props.challenge.id, user: user});
+    socket.emit('room', {room: nextProps.challenge.id, user: user});
     this.setState({users: users})
   }
 
@@ -82,7 +84,10 @@ class Room extends React.Component {
   }
 
   joinUser(user) {
-    this.setState({users: [...this.state.users, user]})
+    const combinedUsers = [...this.state.users, user]
+    const newUsers = Array.from(new Set(combinedUsers));
+    const cleanUsers = newUsers.filter(user => {return user.length > 1})
+    this.setState({users: cleanUsers})
   }
 
 
@@ -123,7 +128,7 @@ class Room extends React.Component {
   }
 
   changeMode(newMode) {
-    this.updateModeInState
+    this.updateModeInState(newMode)
     socket.emit('change mode', {mode: newMode, room: this.props.challenge.id})
   }
 
@@ -164,7 +169,8 @@ class Room extends React.Component {
 function mapStateToProps(state, ownProps) {
   if (state.challenges.length > 0) {
     const challenge = state.challenges.filter(challenge => {return challenge.id == ownProps.params.id})[0]
-    return {challenge: challenge, currentUser: state.currentUser}
+    const userName = sessionStorage.currentUser || state.currentUser
+    return {challenge: challenge, currentUser: userName}
   } else {
     return {challenge: {title: '', description: '', source: ''}, currentUser: ''}
   }
