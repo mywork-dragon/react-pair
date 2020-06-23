@@ -40,12 +40,31 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     console.log('user disconnected');
   });
+
+  socket.on('room', function(data) {
+    console.log('in joining room in SERVER')
+    socket.join(data.room);
+    console.log(data.users)
+    socket.broadcast.to(data.room).emit('load present users')
+    socket.broadcast.to(data.room).emit('new user join', data.user)
+  });
+
+  socket.on('leave room', function(data) {
+    socket.broadcast.to(data.room).emit('user left room', {user: data.user})
+    socket.leave(data.room)
+  })
+
   socket.on('coding event', function(data) {
     console.log('in EXPRESS coding event')
-    socket.broadcast.emit('receive code', data)
+    console.log(data.room)
+    socket.broadcast.to(data.room).emit('receive code', data.code);
   })
   socket.on('change mode', function(data) {
-    socket.broadcast.emit('receive change mode', data)
+    socket.broadcast.to(data.room).emit('receive change mode', data.mode)
+  })
+
+  socket.on('send users', function(data) {
+    socket.broadcast.to(data.room).emit('load users', data.users)
   })
 });
 

@@ -2,7 +2,10 @@ import React from 'react'
 import {Link, browserHistory} from 'react-router';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
-import * as actions from '../actions/challengesActions';
+import * as challengesActions from '../actions/challengesActions';
+import * as userActions from '../actions/userActions.js';
+import ChallengesList from './ChallengesList';
+import ChooseUserName from './ChooseUserName';
 
 
 class HomePage extends React.Component {
@@ -11,25 +14,26 @@ class HomePage extends React.Component {
       this.props.actions.getChallenges()
     }
   }
+
+  chooseUserName(userName) {
+    this.props.actions.assignUserName(userName);
+  }
   render() {
     return (
       <div>
-        <ul>
-          {this.props.challenges.map((challenge) => {
-            return <li><Link to={`/rooms/${challenge.id}`}>{challenge.title}</Link></li>
-          })}
-        </ul>
+        <ChooseUserName userName={this.props.userName} chooseUserName={this.chooseUserName.bind(this)}/>
+        <ChallengesList challenges={this.props.challenges} />
       </div>
     )
   }
 }
 
 function mapStateToProps(state) {
-  return {challenges: state.challenges}
+  return {challenges: state.challenges, userName: state.currentUser}
 }
 
 function mapDispatchToProps(dispatch) {
-  return {actions: bindActionCreators(actions, dispatch)}
+  return {actions: bindActionCreators(Object.assign(userActions, challengesActions), dispatch)}
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(HomePage);

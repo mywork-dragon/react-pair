@@ -1,6 +1,7 @@
+import faker from 'faker'
 const initialState = {
   challenges: [],
-  session: false
+  currentUser: faker.internet.userName()
 };
 
 export default initialState;
